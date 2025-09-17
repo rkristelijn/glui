@@ -68,7 +68,7 @@ git push --tags                         # Trigger release
 | [Developer Guide](developer-guide.md) | Security, conventions, Go best practices, setup |
 | [Code Template](code-template.md) | Template for new files with documentation links |
 | [Documentation Orchestration](documentation-orchestration.md) | Rules for user vs developer docs |
-| [Documentation Orchestration](documentation-orchestration.md) | Rules for user vs developer docs |
+| [GitHub Setup](github-setup.md) | Repository setup, CI/CD, secrets |
 
 ### Project Management
 | Document | Purpose |
