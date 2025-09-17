@@ -21,6 +21,18 @@ export GITLAB_URL="https://gitlab.com"
 - Pin dependency versions in go.mod
 - Regularly update dependencies: `go get -u ./...`
 - Review new dependencies before adding
+- **Security audit**: `make audit` (uses govulncheck)
+
+```bash
+# Install security tools
+make install-security
+
+# Run security audit
+make audit
+
+# Check for outdated dependencies
+go list -u -m all
+```
 
 ## Git Conventions
 

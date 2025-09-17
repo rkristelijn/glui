@@ -1,4 +1,4 @@
-.PHONY: build test lint clean
+.PHONY: build test lint clean audit install-security
 
 # Build the binary
 build:
@@ -17,6 +17,14 @@ test-coverage:
 lint:
 	go vet ./...
 	go fmt ./...
+
+# Security audit
+audit:
+	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+# Install security tools
+install-security:
+	go install golang.org/x/vuln/cmd/govulncheck@latest
 
 # Clean build artifacts
 clean:
