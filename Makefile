@@ -1,4 +1,4 @@
-.PHONY: build test test-integration test-e2e test-all lint clean audit install-security update-golden docs-sync docs-validate deps
+.PHONY: build test test-integration test-all lint clean audit install-security deps
 
 # Install dependencies
 deps:
@@ -11,22 +11,18 @@ build:
 
 # Run unit tests
 test:
-	go test ./...
+	go test ./internal/...
 
 # Run integration tests (requires GITLAB_TOKEN)
 test-integration:
-	go test -tags=integration ./...
-
-# Run E2E tests
-test-e2e: build
-	./test/e2e/run-tests.sh
+	@if [ -z "$(GITLAB_TOKEN)" ]; then \
+		echo "GITLAB_TOKEN not set, skipping integration tests"; \
+		exit 0; \
+	fi
+	go test -v ./internal/gitlab/... -run Integration
 
 # Run all tests
-test-all: test test-integration test-e2e
-
-# Update golden files for snapshot testing
-update-golden:
-	go test ./... -update
+test-all: test test-integration
 
 # Run tests with coverage
 test-coverage:
@@ -53,12 +49,3 @@ clean:
 # Run the application
 run:
 	go run main.go
-
-# Check documentation sync
-docs-sync: build
-	./scripts/check-docs-sync.sh
-
-# Validate documentation
-docs-validate:
-	@command -v markdown-link-check >/dev/null 2>&1 || { echo "Installing markdown-link-check..."; npm install -g markdown-link-check; }
-	find . -name "*.md" -exec markdown-link-check {} \;

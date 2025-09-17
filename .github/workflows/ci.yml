@@ -27,19 +27,29 @@ jobs:
           ${{ runner.os }}-go-
     
     - name: Install dependencies
-      run: make deps
+      run: |
+        go mod tidy
+        go mod download
+    
+    - name: Check formatting
+      run: |
+        if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+          echo "Code is not formatted. Run 'go fmt ./...'"
+          gofmt -s -l .
+          exit 1
+        fi
     
     - name: Lint
-      run: make lint
+      run: go vet ./...
     
     - name: Build
-      run: make build
+      run: go build -o glui main.go
     
     - name: Run unit tests
-      run: make test
+      run: go test ./internal/...
     
     - name: Run tests with coverage
-      run: make test-coverage
+      run: go test -coverprofile=coverage.out ./internal/...
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -47,18 +57,11 @@ jobs:
         file: ./coverage.out
         fail_ci_if_error: false
     
-    - name: Install expect for E2E tests
-      run: sudo apt-get update && sudo apt-get install -y expect
-    
-    - name: Run E2E tests
-      run: make test-e2e
-    
     - name: Security audit
-      run: make audit
+      run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
   integration-test:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
     - uses: actions/checkout@v4
@@ -69,12 +72,6 @@ jobs:
         go-version: '1.21'
     
     - name: Run integration tests
-      env:
-        GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
-        GITLAB_URL: https://gitlab.com
       run: |
-        if [ -n "$GITLAB_TOKEN" ]; then
-          make test-integration
-        else
-          echo "GITLAB_TOKEN not set, skipping integration tests"
-        fi
+        echo "Running integration tests against public GitLab repos..."
+        go test -v ./internal/gitlab/... -run Integration

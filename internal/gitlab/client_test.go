@@ -40,7 +40,7 @@ func TestClient_GetPipelines(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "/api/v4/projects/test/repo/pipelines", r.URL.Path)
 		assert.Equal(t, "Bearer test-token", r.Header.Get("Authorization"))
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(mockPipelines)
 	}))
@@ -48,10 +48,10 @@ func TestClient_GetPipelines(t *testing.T) {
 
 	// Create client
 	client := NewClient(server.URL, "test-token")
-	
+
 	// Test GetPipelines
 	pipelines, err := client.GetPipelines("test/repo")
-	
+
 	require.NoError(t, err)
 	assert.Len(t, pipelines, 2)
 	assert.Equal(t, 123, pipelines[0].ID)
@@ -67,9 +67,9 @@ func TestClient_GetPipelines_AuthError(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient(server.URL, "invalid-token")
-	
+
 	_, err := client.GetPipelines("test/repo")
-	
+
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "unauthorized")
 }
@@ -82,9 +82,9 @@ func TestClient_GetPipelines_NotFound(t *testing.T) {
 	defer server.Close()
 
 	client := NewClient(server.URL, "test-token")
-	
+
 	_, err := client.GetPipelines("nonexistent/repo")
-	
+
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "not found")
 }

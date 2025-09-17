@@ -4,11 +4,19 @@ GitLab Terminal UI - Navigate GitLab from your terminal with k9s-style interface
 
 Browse pipelines, merge requests, issues, and jobs with keyboard navigation. Designed for developers who prefer CLI/TUI tools over web interfaces.
 
-**Status**: Early development - GitLab API client working, CLI/TUI interfaces in progress.
+**Status**: ✅ **Working Prototype** - End-to-end pipeline viewing with real GitLab API integration.
+
+## Features
+
+✅ **Pipeline Monitoring** - View real-time pipeline status with k9s-style navigation  
+✅ **GitLab API Integration** - Connects to any GitLab instance (gitlab.com or self-hosted)  
+✅ **Smart Caching** - 30-second cache to reduce API calls  
+✅ **Status Indicators** - Color-coded pipeline states (running, success, failed)  
+✅ **Keyboard Navigation** - j/k navigation, r to refresh, q to quit  
 
 ## Installation
 
-### Download Binary (Current)
+### Download Binary (Coming Soon)
 
 ```bash
 # Download latest release
@@ -40,34 +48,56 @@ Required scopes: `api`, `read_user`, `read_repository`
 ```bash
 export GITLAB_TOKEN="glpat-xxxxxxxxxxxxxxxxxxxx"
 export GITLAB_URL="https://gitlab.com"  # optional, defaults to gitlab.com
+export GITLAB_PROJECT_ID="mygroup/myproject"
 ```
 
 **Option B: Configuration File**
 ```bash
-# Create .env file in your project or home directory
+# Create .env file in your project directory
 echo "GITLAB_TOKEN=glpat-xxxxxxxxxxxxxxxxxxxx" > .env
 echo "GITLAB_URL=https://gitlab.com" >> .env
+echo "GITLAB_PROJECT_ID=mygroup/myproject" >> .env
 ```
 
 ## Usage
 
 ```bash
-# Interactive TUI mode
+# Interactive TUI mode (current)
 glui
 
-# CLI mode (specific commands)
+# CLI mode (planned)
 glui pipelines
 glui merge-requests
 glui issues
 ```
 
-**Note**: Currently shows "not implemented yet" - TUI interface in development.
+### TUI Controls
+
+- `j/k` or `↑/↓` - Navigate pipeline list
+- `r` - Refresh data from GitLab
+- `q` - Quit application
+
+## Current Status
+
+**Working:**
+- ✅ Real GitLab API connection
+- ✅ Pipeline list view with live data
+- ✅ k9s-style keyboard navigation
+- ✅ Status indicators and formatting
+- ✅ Configuration via .env file
+
+**Planned:**
+- 🔄 Merge requests view
+- 🔄 Issues view
+- 🔄 Pipeline job details
+- 🔄 Log viewing
+- 🔄 Multi-project support
 
 ## More Information
 
 - [📖 Developer Documentation](docs/README.md) - Contributing, architecture, technical details
 - [📋 Current Progress](TODO.md) - What's working, what's next
-- [🎯 Roadmap](docs/milestones.md) - Development phases and timeline
+- [🎯 Use Cases](docs/use-cases.md) - User workflows and interaction patterns
 
 ---
 

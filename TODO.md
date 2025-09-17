@@ -1,8 +1,8 @@
 # TODO
 
-Current focus: **M0 Foundation** - Get one feature working end-to-end with tests.
+Current focus: **M1 Core Engine** - Expand TUI functionality and add more views.
 
-## M0: Foundation (Current Sprint)
+## M0: Foundation ✅ COMPLETE
 
 ### 1. Project Setup ✅ DONE
 - [x] Initialize Go module with proper structure
@@ -12,81 +12,78 @@ Current focus: **M0 Foundation** - Get one feature working end-to-end with tests
 - [x] Add E2E testing framework
 - [x] Add golden file testing for TUI snapshots
 
-### 2. GitLab API Client (TDD) ✅ DONE
+### 2. GitLab API Client ✅ DONE
 - [x] Write test for `GetPipelines()` with mock response
 - [x] Implement minimal GitLab client
 - [x] Add authentication (token from env/config)
 - [x] Add basic error handling (network, auth, not found)
 - [x] Test with real GitLab instance (integration test)
 
-**Test Status**: ✅ All tests pass, 81.8% coverage, no vulnerabilities
+### 3. Core Engine Foundation ✅ DONE
+- [x] Write test for core pipeline service
+- [x] Implement core interface
+- [x] Add basic caching (in-memory for now)
+- [x] Test error propagation from API to core
 
-### 3. Core Engine Foundation 🔄 IN PROGRESS
-- [ ] Write test for core pipeline service
-- [ ] Implement core interface
-  ```go
-  type Core interface {
-      ListPipelines(repo string) ([]Pipeline, error)
-  }
-  ```
-- [ ] Add basic caching (in-memory for now)
-- [ ] Test error propagation from API to core
+### 4. End-to-End TUI ✅ DONE
+- [x] Connect GitLab API to core service via adapter
+- [x] Implement k9s-style TUI with real data
+- [x] Add .env file loading
+- [x] Test with real GitLab project
+- [x] Pipeline navigation and status indicators
 
-### 4. CLI Command 🔄 NEXT
-- [ ] Setup cobra CLI framework
-- [ ] Implement `glui pipelines <repo>` command
-- [ ] Add output formatting (table format)
-- [ ] Add `--help` and basic flags
-- [ ] Test CLI integration
+**Test Status**: ✅ All tests pass, working e2e prototype with real GitLab data
 
-### 5. Validation & Documentation 🔄 NEXT
-- [ ] Update architecture.md if design changed
-- [ ] Add API.md with GitLab endpoints used
-- [ ] Verify all tests pass
-- [ ] Demo: `glui pipelines my-repo` works
+## M1: Core Engine (Current Sprint)
 
-## M1: Core Engine (.soon)
-- State management
-- Full caching layer
-- All CLI commands
-- Comprehensive error handling
+### 1. Multi-View Support 🔄 NEXT
+- [ ] Add merge requests view (`m` key)
+- [ ] Add issues view (`i` key)
+- [ ] Implement view state management
+- [ ] Add view switching tests
+
+### 2. Enhanced Navigation 🔄 NEXT
+- [ ] Pipeline drill-down (ENTER to view jobs)
+- [ ] Job details view
+- [ ] Log viewing (`l` key)
+- [ ] Back navigation (ESC key)
+
+### 3. Error Handling & UX 🔄 NEXT
+- [ ] Loading states in TUI
+- [ ] Error display in TUI
+- [ ] Connection retry logic
+- [ ] Graceful API failure handling
+
+## M2: Advanced Features (.soon)
+- Search/filtering (`/` key)
+- Multi-project support
 - Configuration management
+- Auto-refresh intervals
 
-## M2: Basic TUI (.soon)
-- TUI framework integration
-- List views with navigation
-- Keyboard shortcuts
-- Status indicators
-
-## M3: Advanced Navigation (.soon)
-- Drill-down workflows
-- Context preservation
-- Auto-refresh
-- Search/filtering
-
-## M4: Polish & Performance (.soon)
+## M3: Polish & Performance (.soon)
 - Performance optimization
-- Multi-instance support
+- Memory usage optimization
 - Documentation polish
 - Release preparation
 
-## M5: Advanced Features (.soon)
-- Pipeline creation
-- MR templates
-- Notifications
-- Artifact downloads
-
 ---
 
-## Current Blockers
-*None - ready to start M0*
+## Current Architecture
 
-## Decisions Needed
-- GitLab API library: custom vs existing (go-gitlab)
-- TUI framework: bubbletea vs tview vs custom
-- Config format: YAML vs TOML vs JSON
+```
+GitLab API → Adapter → Core Service → TUI
+     ↓           ↓          ↓         ↓
+  HTTP Client  Convert   Cache    k9s-style
+  Auth/Error   Models   30s TTL   Navigation
+```
+
+## Decisions Made
+- ✅ GitLab API library: custom HTTP client
+- ✅ TUI framework: tview (works well)
+- ✅ Config format: .env file (simple)
+- ✅ Caching: in-memory with TTL
 
 ## Notes
-- Study k9s architecture in `~/git/hub/k9s` for TUI patterns
-- Keep each step small and testable
-- Update this TODO after each completed item
+- Working prototype connects to real GitLab
+- k9s-style navigation implemented
+- Ready for feature expansion

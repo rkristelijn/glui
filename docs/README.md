@@ -1,87 +1,81 @@
 # GLUI Developer Documentation
 
-Technical documentation for contributors and maintainers.
+## Project Status: Working Prototype ✅
 
-## 1. Context (Technical)
+GLUI now has a **working end-to-end prototype** that connects to real GitLab APIs and displays pipeline data in a k9s-style TUI.
 
-| Document | Purpose |
-|----------|---------|
-| [Architecture](architecture.md) | C4 model, design decisions, tech stack |
-| [Code Principles](this-code-principles.md) | GLUI-specific principles (CLI UX, error handling) |
-| [General Principles](general-principles.md) | Universal coding principles (KISS, YAGNI, etc.) |
-| [Milestones](milestones.md) | Development roadmap and validation checkpoints |
-
-**Current Architecture**: Go application with GitLab API client, planned CLI/TUI interfaces using cobra/bubbletea.
-
-## 2. Prerequisites (Development)
-
-- **Go 1.21+** with modules support
-- **Security tools**: `make install-security` (govulncheck)
-- **Testing tools**: testify, expect (for E2E)
-- **GitLab token** for integration testing
-- **Development environment**: See [Developer Guide](developer-guide.md)
-
-## 3. Local Setup (Development)
+## Quick Start
 
 ```bash
-# Full development setup
-make deps              # Install dependencies
-make install-security  # Install security tools
-cp .env.example .env   # Configure environment
-make build            # Build binary
-make test-all         # Run all tests
+# 1. Set up GitLab token
+export GITLAB_TOKEN="glpat-your-token"
+export GITLAB_PROJECT_ID="your-group/your-project"
+
+# 2. Build and run
+make build
+./glui
 ```
 
-**Development workflow**: TDD approach, conventional commits, pre-commit hooks enforced.
+## Architecture Overview
 
-## 4. Validation (Technical)
-
-| Test Type | Command | Coverage |
-|-----------|---------|----------|
-| Unit | `make test` | 81.8% (GitLab client) |
-| Integration | `make test-integration` | Real GitLab API |
-| E2E | `make test-e2e` | User workflows |
-| Security | `make audit` | Vulnerability scan |
-| Golden Files | `make update-golden` | TUI snapshots |
-
-**Quality gates**: All tests pass, no vulnerabilities, conventional commits.
-
-## 5. Release (Technical)
-
-```bash
-# Development process
-git commit -m "feat(scope): description"  # Conventional commits
-make test-all                            # Validate changes
-git tag v0.1.0                          # Version tagging
-git push --tags                         # Trigger release
-
-# Future: Automated releases via GitHub Actions
+```
+GitLab API → Adapter → Core Service → TUI
+     ↓           ↓          ↓         ↓
+  HTTP Client  Convert   Cache    k9s-style
+  Auth/Error   Models   30s TTL   Navigation
 ```
 
-**Versioning**: Semantic versioning, automated changelog generation.
-
-## 6. More Information (Technical)
+## Documentation Structure
 
 ### Core Documentation
-| Document | Purpose |
-|----------|---------|
-| [Developer Guide](developer-guide.md) | Security, conventions, Go best practices, setup |
-| [Code Template](code-template.md) | Template for new files with documentation links |
-| [Documentation Orchestration](documentation-orchestration.md) | Rules for user vs developer docs |
-| [GitHub Setup](github-setup.md) | Repository setup, CI/CD, secrets |
+- **[Architecture](architecture.md)** - System design and component interactions
+- **[Use Cases](use-cases.md)** - User workflows and interaction patterns
+- **[Developer Guide](developer-guide.md)** - Contributing and development setup
+
+### Implementation Details
+- **[UI Mockups](ui-mockups.md)** - k9s-style interface designs
+- **[Code Principles](this-code-principles.md)** - Development guidelines
+- **[Milestones](milestones.md)** - Project roadmap and phases
 
 ### Project Management
-| Document | Purpose |
-|----------|---------|
-| [TODO](../TODO.md) | Current progress and next steps |
-| [Milestones](milestones.md) | Development phases and validation |
+- **[GitHub Setup](github-setup.md)** - Repository configuration
+- **[Documentation Orchestration](documentation-orchestration.md)** - Doc management
 
-### Code Organization
-- **Package headers**: All files link to relevant documentation
-- **Testing**: Unit, integration, E2E, golden file testing
-- **Security**: Vulnerability scanning, secret management
-- **Architecture**: Clean separation of concerns (API, Core, UI)
+## Current Implementation
+
+### ✅ Working Features
+- **GitLab API Client** - HTTP client with auth and error handling
+- **Core Service** - Business logic with 30-second caching
+- **k9s-style TUI** - Pipeline navigation with j/k keys
+- **Configuration** - .env file loading
+- **Status Indicators** - Color-coded pipeline states
+
+### 🔄 Next Features (M1)
+- Merge requests view
+- Issues view
+- Pipeline drill-down
+- Job details and logs
+
+## Development
+
+```bash
+# Run tests
+make test
+
+# Build
+make build
+
+# Run with real GitLab data
+./glui
+```
+
+## Contributing
+
+1. Read [Developer Guide](developer-guide.md)
+2. Follow [Code Principles](this-code-principles.md)
+3. Check [TODO.md](../TODO.md) for current tasks
+4. Submit PRs with tests
 
 ---
 
-**For end users**: See [root README.md](../README.md) for quick start and usage instructions.
+**Status**: M0 Foundation complete, M1 Core Engine in progress

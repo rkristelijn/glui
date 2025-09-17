@@ -1,331 +1,200 @@
-# GLUI Architecture (C4 Model)
+# GLUI Architecture
 
-## Context Diagram
+## Current Status: Working Prototype ✅
 
-```mermaid
-graph TB
-    User[Developer] --> GLUI[GLUI CLI Tool]
-    GLUI --> GitLab[GitLab API]
-    GLUI --> FS[File System<br/>~/.config/glui/]
-    
-    User -.-> Browser[Web Browser<br/>fallback for complex actions]
-    GitLab -.-> Browser
+GLUI has a working end-to-end implementation connecting real GitLab APIs to a k9s-style TUI.
+
+## System Overview
+
+```
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   GitLab    │    │   Adapter   │    │    Core     │    │     TUI     │
+│  API Client │───▶│   Layer     │───▶│   Service   │───▶│  Interface  │
+│             │    │             │    │             │    │             │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+      │                    │                  │                  │
+   HTTP/JSON          Model Convert       Caching           k9s-style
+   Auth/Error         gitlab→core         30s TTL           Navigation
 ```
 
-## Container Diagram
+## Component Details
 
-```mermaid
-graph TB
-    subgraph "GLUI Application"
-        CLI[CLI Parser<br/>cobra]
-        Core[Core Engine<br/>business logic]
-        TUI[Terminal UI<br/>bubbletea/lipgloss]
-        API[GitLab Client<br/>HTTP client]
-        Cache[Local Cache<br/>JSON files]
-    end
-    
-    User[Developer] --> CLI
-    User --> TUI
-    CLI --> Core
-    TUI --> Core
-    Core --> API
-    Core --> Cache
-    API --> GitLab[GitLab API]
-    Cache --> FS[~/.config/glui/]
-```
+### 1. GitLab API Client (`internal/gitlab/`)
 
-## Component Diagram - Core Engine
+**Purpose**: HTTP client for GitLab API communication
 
-```mermaid
-graph LR
-    subgraph "Core Engine"
-        Cmd[Command Handler]
-        State[State Manager]
-        GL[GitLab Service]
-        Cache[Cache Service]
-    end
-    
-    CLI[CLI Mode] --> Cmd
-    TUI[Interactive Mode] --> Cmd
-    Cmd --> State
-    State --> GL
-    State --> Cache
-    GL --> API[GitLab API]
-    Cache --> Files[Local Files]
-```
-
-## Design Decisions
-
-### 1. Dual Interface Pattern
-**Decision**: Single core with two interfaces (CLI + TUI)
-
+**Implementation**:
 ```go
-// Shared core interface
-type Core interface {
+type Client interface {
     GetPipelines(repo string) ([]Pipeline, error)
-    GetMergeRequests(repo string) ([]MR, error)
-    CreatePipeline(repo, branch string, vars map[string]string) error
 }
 
-// CLI usage
-glui pipelines my-repo
-
-// TUI usage  
-glui (interactive mode)
+type HTTPClient struct {
+    baseURL string
+    token   string
+    client  *http.Client
+}
 ```
 
-**Benefits**:
-- Code reuse between modes
-- Consistent behavior
-- Easy testing with mocks
+**Features**:
+- Bearer token authentication
+- URL encoding for project paths
+- HTTP error handling (401, 404, etc.)
+- JSON response parsing
 
-### 2. State Management
-**Decision**: Centralized state with event-driven updates
+### 2. Adapter Layer (`internal/adapter/`)
 
-```mermaid
-graph LR
-    Action[User Action] --> State[State Manager]
-    State --> Cache[Update Cache]
-    State --> UI[Update UI]
-    State --> API[API Call]
-    API --> State
-```
+**Purpose**: Convert between GitLab and Core models
 
-### 3. Caching Strategy
-**Decision**: Write-through cache with TTL
-
-- **Pipelines**: 30s TTL (status changes frequently)
-- **MRs**: 2min TTL (less frequent updates)  
-- **Projects**: 1hr TTL (rarely change)
-- **User data**: Session-based
-
-### 4. Error Handling
-**Decision**: Layered error handling
-
+**Implementation**:
 ```go
-// API layer - wrap with context
-func (g *GitLabClient) GetPipelines(repo string) error {
-    if err := g.api.Get(); err != nil {
-        return fmt.Errorf("gitlab api: %w", err)
-    }
+type GitLabAdapter struct {
+    client gitlab.Client
 }
 
-// Core layer - add business context  
-func (c *Core) GetPipelines(repo string) error {
-    if err := c.gitlab.GetPipelines(repo); err != nil {
-        return fmt.Errorf("failed to load pipelines for %s: %w", repo, err)
-    }
+func (a *GitLabAdapter) GetPipelines(projectID string) ([]core.Pipeline, error)
+```
+
+**Features**:
+- Model transformation
+- Error propagation
+- Interface compliance
+
+### 3. Core Service (`internal/core/`)
+
+**Purpose**: Business logic and caching
+
+**Implementation**:
+```go
+type PipelineService struct {
+    client GitLabClient
+    cache  map[string]cacheEntry
+    mutex  sync.RWMutex
 }
 ```
 
-## Technology Stack
+**Features**:
+- 30-second TTL cache
+- Thread-safe operations
+- Error wrapping
+- Interface abstraction
 
-| Layer | Technology | Reason |
-|-------|------------|---------|
-| CLI | cobra | Standard Go CLI framework |
-| TUI | bubbletea + lipgloss | Modern, composable TUI |
-| HTTP | net/http + retries | Simple, reliable |
-| Config | viper | Standard config management |
-| Cache | JSON files | Simple, human-readable |
-| Testing | testify + httptest | Standard Go testing |
+### 4. TUI Interface (`cmd/`)
 
-## File Structure
+**Purpose**: k9s-style terminal interface
+
+**Implementation**:
+- **Framework**: tview
+- **Navigation**: j/k keys, arrow keys
+- **Actions**: r (refresh), q (quit)
+- **Display**: Color-coded status indicators
+
+## Data Flow
+
+### Pipeline Loading Sequence
 
 ```
-glui/
-├── cmd/           # CLI commands (cobra)
-├── internal/
-│   ├── core/      # Business logic
-│   ├── gitlab/    # GitLab API client
-│   ├── tui/       # Terminal UI components
-│   ├── cache/     # Caching layer
-│   └── config/    # Configuration
-├── docs/          # Documentation
-└── test/          # Integration tests
+User starts app
+      │
+      ▼
+Load .env config
+      │
+      ▼
+Create GitLab client
+      │
+      ▼
+Wrap in adapter
+      │
+      ▼
+Create core service
+      │
+      ▼
+Initialize TUI
+      │
+      ▼
+Call service.ListPipelines()
+      │
+      ▼
+Check cache (30s TTL)
+      │
+      ▼
+[Cache miss] → API call → Parse JSON → Cache result
+      │
+      ▼
+Return pipelines to TUI
+      │
+      ▼
+Render k9s-style table
 ```
 
-## Class Diagram (Current Implementation)
+## Configuration
 
-```mermaid
-classDiagram
-    class Main {
-        +main()
-        -loadEnv()
-        -detectMode()
-    }
-    
-    class Client {
-        <<interface>>
-        +GetPipelines(repo string) []Pipeline, error
-    }
-    
-    class HTTPClient {
-        -baseURL string
-        -token string
-        -client *http.Client
-        +NewClient(baseURL, token string) Client
-        +GetPipelines(repo string) []Pipeline, error
-        -createRequest(url string) *http.Request, error
-        -handleResponse(resp *http.Response) []Pipeline, error
-    }
-    
-    class Pipeline {
-        +ID int
-        +Status string
-        +Ref string
-        +WebURL string
-        +CreatedAt time.Time
-    }
-    
-    Main --> Client : uses
-    Client <|-- HTTPClient : implements
-    HTTPClient --> Pipeline : returns
-    HTTPClient --> http.Client : uses
+### Environment Variables
+```bash
+GITLAB_TOKEN=glpat-xxxxxxxxxxxxxxxxxxxx
+GITLAB_URL=https://gitlab.com
+GITLAB_PROJECT_ID=mygroup/myproject
 ```
 
-## Sequence Diagram (Current Flow)
+### .env File Support
+- Automatic loading on startup
+- Environment variable override
+- Error handling for missing config
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant M as Main
-    participant E as Environment
-    participant C as HTTPClient
-    participant G as GitLab API
-    
-    U->>M: ./glui [command]
-    M->>E: Load .env file
-    E-->>M: Environment variables
-    
-    alt CLI Mode
-        M->>M: Parse args[1]
-        M->>U: "CLI mode - not implemented yet"
-    else TUI Mode  
-        M->>U: "TUI mode - not implemented yet"
-    end
-    
-    Note over M,G: Future implementation
-    M->>C: NewClient(baseURL, token)
-    C->>C: Initialize HTTP client
-    M->>C: GetPipelines(repo)
-    C->>G: GET /api/v4/projects/{repo}/pipelines
-    G-->>C: JSON response
-    C->>C: Decode JSON to []Pipeline
-    C-->>M: []Pipeline, error
-    M-->>U: Display results
-```
+## Error Handling
 
-## Planned Architecture (Future Implementation)
+### API Errors
+- **401 Unauthorized**: Invalid token
+- **404 Not Found**: Project doesn't exist or no access
+- **Network errors**: Connection failures
 
-### Complete Class Diagram
+### TUI Error Display
+- Loading states
+- Error messages in interface
+- Graceful degradation
 
-```mermaid
-classDiagram
-    class Main {
-        +main()
-        -loadEnv()
-        -detectMode()
-    }
-    
-    class CLI {
-        +Execute()
-        +AddCommand(cmd *Command)
-    }
-    
-    class TUI {
-        +Run() error
-        +Update(msg tea.Msg) tea.Model
-        +View() string
-    }
-    
-    class Core {
-        <<interface>>
-        +GetPipelines(repo string) []Pipeline, error
-        +GetMergeRequests(repo string) []MR, error
-        +CreatePipeline(repo, branch string) error
-    }
-    
-    class Engine {
-        -gitlab Client
-        -cache CacheService
-        -config ConfigService
-        +GetPipelines(repo string) []Pipeline, error
-        +GetMergeRequests(repo string) []MR, error
-    }
-    
-    class Client {
-        <<interface>>
-        +GetPipelines(repo string) []Pipeline, error
-        +GetMergeRequests(repo string) []MR, error
-    }
-    
-    class HTTPClient {
-        -baseURL string
-        -token string
-        -client *http.Client
-        +GetPipelines(repo string) []Pipeline, error
-        +GetMergeRequests(repo string) []MR, error
-    }
-    
-    class CacheService {
-        <<interface>>
-        +Get(key string) interface{}, error
-        +Set(key string, value interface{}, ttl time.Duration) error
-    }
-    
-    class FileCache {
-        -basePath string
-        +Get(key string) interface{}, error
-        +Set(key string, value interface{}, ttl time.Duration) error
-    }
-    
-    class Pipeline {
-        +ID int
-        +Status string
-        +Ref string
-        +WebURL string
-        +CreatedAt time.Time
-    }
-    
-    Main --> CLI : creates
-    Main --> TUI : creates
-    CLI --> Core : uses
-    TUI --> Core : uses
-    Core <|-- Engine : implements
-    Engine --> Client : uses
-    Engine --> CacheService : uses
-    Client <|-- HTTPClient : implements
-    CacheService <|-- FileCache : implements
-    HTTPClient --> Pipeline : returns
-```
+## Testing Strategy
 
-### Complete Data Flow
+### Unit Tests
+- Core service with mocked GitLab client
+- Adapter model conversion
+- Cache behavior verification
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant C as CLI/TUI
-    participant Core as Core Engine
-    participant Cache as Cache
-    participant API as GitLab API
-    
-    U->>C: Request pipelines
-    C->>Core: GetPipelines(repo)
-    Core->>Cache: Check cache
-    alt Cache hit
-        Cache-->>Core: Return cached data
-    else Cache miss
-        Core->>API: Fetch pipelines
-        API-->>Core: Pipeline data
-        Core->>Cache: Store data
-    end
-    Core-->>C: Pipeline data
-    C-->>U: Display pipelines
-```
+### Integration Tests
+- Real GitLab API calls
+- End-to-end pipeline loading
+- Configuration loading
 
-## Scalability Considerations
+## Performance Considerations
 
-- **Concurrent API calls**: Use worker pools for batch operations
-- **Memory usage**: Stream large responses, limit cache size
-- **Rate limiting**: Respect GitLab API limits (300 req/min)
-- **Config**: Support multiple GitLab instances (cloud + on-prem)
+### Caching
+- 30-second TTL reduces API calls
+- Thread-safe cache implementation
+- Memory-based storage
+
+### TUI Rendering
+- Efficient table updates
+- Minimal redraws
+- Responsive navigation
+
+## Security
+
+### Token Handling
+- Environment variable storage
+- No token logging
+- Secure HTTP headers
+
+### API Communication
+- HTTPS only
+- Bearer token authentication
+- Input validation
+
+---
+
+## Next Phase: M1 Core Engine
+
+### Planned Additions
+- Merge requests API client
+- Issues API client
+- Multi-view TUI navigation
+- Pipeline drill-down functionality
