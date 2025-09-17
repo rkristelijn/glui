@@ -1,12 +1,27 @@
-.PHONY: build test lint clean audit install-security
+.PHONY: build test test-integration test-e2e test-all lint clean audit install-security update-golden
 
 # Build the binary
 build:
 	go build -o glui main.go
 
-# Run tests
+# Run unit tests
 test:
 	go test ./...
+
+# Run integration tests (requires GITLAB_TOKEN)
+test-integration:
+	go test -tags=integration ./...
+
+# Run E2E tests
+test-e2e: build
+	./test/e2e/run-tests.sh
+
+# Run all tests
+test-all: test test-integration test-e2e
+
+# Update golden files for snapshot testing
+update-golden:
+	go test ./... -update
 
 # Run tests with coverage
 test-coverage:

@@ -123,6 +123,58 @@ if err := client.GetPipelines(repo); err != nil {
 - **Table-driven tests** for multiple scenarios
 - **Mock external dependencies** - use interfaces
 - **Test error cases** - not just happy path
+- **Golden file testing** - for TUI snapshots
+- **E2E testing** - full user workflows
+
+```bash
+# Unit tests
+make test
+
+# Integration tests (requires GITLAB_TOKEN)
+export GITLAB_TOKEN="your-token"
+make test-integration
+
+# E2E tests (full user workflows)
+make test-e2e
+
+# All tests
+make test-all
+
+# Update golden files (TUI snapshots)
+make update-golden
+```
+
+#### TUI Testing Patterns
+
+**Golden File Testing** - Capture TUI output as snapshots:
+```go
+func TestPipelineList(t *testing.T) {
+    output := renderPipelineList(mockData)
+    golden.AssertTUISnapshot(t, output, "pipeline-list-step1")
+}
+
+// Run with -update to create/update golden files
+go test ./... -update
+```
+
+**E2E Testing** - Full user workflows with expect:
+```bash
+# Install expect for interactive testing
+brew install expect
+
+# E2E tests simulate real user interactions
+./test/e2e/run-tests.sh
+```
+
+**Integration Testing** - Real GitLab API calls:
+```go
+func TestRealGitLab(t *testing.T) {
+    if os.Getenv("GITLAB_TOKEN") == "" {
+        t.Skip("GITLAB_TOKEN not set")
+    }
+    // Test with real API
+}
+```
 
 ```go
 func TestGetPipelines(t *testing.T) {
