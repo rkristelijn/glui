@@ -4,29 +4,24 @@ Current focus: **M0 Foundation** - Get one feature working end-to-end with tests
 
 ## M0: Foundation (Current Sprint)
 
-### 1. Project Setup
-- [ ] Initialize Go module with proper structure
-  ```bash
-  go mod init github.com/user/glui
-  mkdir -p {cmd,internal/{core,gitlab,cache,config},test}
-  ```
-- [ ] Setup testing framework (testify)
-- [ ] Add Makefile with common tasks (build, test, lint)
-- [ ] Setup CI/CD pipeline (GitHub Actions)
+### 1. Project Setup ✅ DONE
+- [x] Initialize Go module with proper structure
+- [x] Setup testing framework (testify)
+- [x] Add Makefile with common tasks (build, test, lint)
+- [x] Setup security audit (govulncheck)
+- [x] Add E2E testing framework
+- [x] Add golden file testing for TUI snapshots
 
-### 2. GitLab API Client (TDD)
-- [ ] Write test for `GetPipelines()` with mock response
-- [ ] Implement minimal GitLab client
-  ```go
-  type Client interface {
-      GetPipelines(repo string) ([]Pipeline, error)
-  }
-  ```
-- [ ] Add authentication (token from env/config)
-- [ ] Add basic error handling (network, auth, not found)
-- [ ] Test with real GitLab instance
+### 2. GitLab API Client (TDD) ✅ DONE
+- [x] Write test for `GetPipelines()` with mock response
+- [x] Implement minimal GitLab client
+- [x] Add authentication (token from env/config)
+- [x] Add basic error handling (network, auth, not found)
+- [x] Test with real GitLab instance (integration test)
 
-### 3. Core Engine Foundation
+**Test Status**: ✅ All tests pass, 81.8% coverage, no vulnerabilities
+
+### 3. Core Engine Foundation 🔄 IN PROGRESS
 - [ ] Write test for core pipeline service
 - [ ] Implement core interface
   ```go
@@ -37,14 +32,14 @@ Current focus: **M0 Foundation** - Get one feature working end-to-end with tests
 - [ ] Add basic caching (in-memory for now)
 - [ ] Test error propagation from API to core
 
-### 4. CLI Command
+### 4. CLI Command 🔄 NEXT
 - [ ] Setup cobra CLI framework
 - [ ] Implement `glui pipelines <repo>` command
 - [ ] Add output formatting (table format)
 - [ ] Add `--help` and basic flags
 - [ ] Test CLI integration
 
-### 5. Validation & Documentation
+### 5. Validation & Documentation 🔄 NEXT
 - [ ] Update architecture.md if design changed
 - [ ] Add API.md with GitLab endpoints used
 - [ ] Verify all tests pass
