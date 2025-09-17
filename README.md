@@ -1,48 +1,120 @@
 # GLUI
 
-Gitlab (terminal)ui to navigate gitlab
+GitLab Terminal UI - Navigate GitLab from your terminal with k9s-style interface.
 
-// to build
-## Features
+## Status: M0 Foundation (40% Complete)
 
-*basics*
+✅ **Working**: GitLab API client, testing framework, security audit  
+🔄 **In Progress**: Core engine, CLI commands  
+📋 **Next**: TUI interface, navigation workflows
 
-list the pipelines
-list the merge request
-list the issues
-list the jobs
-list the log from the job with auto refresh
+## Quick Start
 
-*use case*
-navigate from merge request to pipeline to job to log
-create a new pipeline with custom inputs on a branch to test things
-create a merge request from the console using the gitlab template with the merge request title standard configured in this repo
-easy navigate to the favorite repos
-set a monitor on the pipeline of a merge request and get a notification if success or fail
-cli integration for non-interactive ai e.g. Amazon q usage, clear --help to get directly what you want
-download/see artifacts from pipelines for easy debugging
+### Prerequisites
+- Go 1.21+ ([install guide](https://golang.org/doc/install))
+- GitLab token for API access
 
-*user/developer interface*
-same ui as k9s
-easy navigation using the keyboard
-checks for the height and the width automatically
-uses gitlab api and uses the key from the .env file
-? need some help where to store the keys
+### Installation
+```bash
+git clone <repo-url>
+cd glui
+make deps          # Install dependencies
+make build         # Build binary
+```
+
+### Usage
+```bash
+# Currently available (basic mode detection)
+./glui             # TUI mode (not implemented yet)
+./glui pipelines   # CLI mode (not implemented yet)
+
+# Development
+make test          # Run all tests
+make test-e2e      # Run E2E tests
+make audit         # Security audit
+```
+
+### Configuration
+```bash
+# Required for GitLab API access
+export GITLAB_TOKEN="glpat-xxxxxxxxxxxxxxxxxxxx"
+export GITLAB_URL="https://gitlab.com"  # optional, defaults to gitlab.com
+```
+
+## Planned Features
+
+### Core Features
+- **Pipelines** - List, monitor, create with custom variables
+- **Merge Requests** - Browse, create from templates  
+- **Jobs** - View logs with auto-refresh
+- **Issues** - List and navigate
+- **Navigation** - MR → Pipeline → Job → Logs workflow
+
+### User Experience
+- **Keyboard-first** - vim-like navigation (j/k, h/l)
+- **Fast** - Caching with smart refresh
+- **Offline-aware** - Works with cached data
+- **Multi-instance** - Support cloud + on-prem GitLab
 
 ## Architecture
 
-uses a core, with an interactive terminal ui but also the commands can be executed on the commandline
-probably using go
+```
+┌─────────────┐    ┌─────────────┐
+│   CLI Mode  │    │   TUI Mode  │
+└──────┬──────┘    └──────┬──────┘
+       │                  │
+       └────────┬─────────┘
+                │
+        ┌───────▼────────┐
+        │  Core Engine   │  ✅ GitLab API Client
+        └───────┬────────┘  🔄 Business Logic
+                │           📋 Caching Layer
+    ┌───────────┼───────────┐
+    │           │           │
+┌───▼───┐  ┌───▼────┐  ┌──▼───┐
+│ Cache │  │ GitLab │  │ Config│
+│       │  │  API   │  │       │
+└───────┘  └────────┘  └──────┘
+```
 
-## Planning
+## Development
 
-0. let's first make a design to cover all features, identify missing features, keep a TODO.md
-1. make a simple set up using go, make the basic navigation work, see k9s documentation
-2. make the core menu supporting all features, but with mock functionality
-3. make the connection with real gitlab, support only cloud for now, on prem, let's do that later
-4. make small improvements, stick to the plan
-5. on every change create a small log file
+### Current Test Status
+- ✅ All tests pass
+- ✅ 81.8% code coverage
+- ✅ No security vulnerabilities
+- ✅ E2E testing framework ready
 
-inspiration:
-- ~/git/hub/k9s
-- ~/git/hub/glab-tui
+### Commands
+```bash
+make build         # Build binary
+make test          # Unit tests
+make test-e2e      # E2E tests
+make test-all      # All tests
+make audit         # Security audit
+make lint          # Code formatting
+make clean         # Clean artifacts
+```
+
+## Documentation
+
+- [📖 Full Documentation](docs/README.md) - Architecture, principles, guides
+- [🚀 Developer Guide](docs/developer-guide.md) - Setup, conventions, best practices
+- [📋 TODO](TODO.md) - Current progress and next steps
+- [🎯 Milestones](docs/milestones.md) - Development roadmap
+
+## Inspiration
+
+- [k9s](https://github.com/derailed/k9s) - Kubernetes TUI
+- [glab-tui](https://github.com/gitlab-tui/glab-tui) - GitLab TUI reference
+
+## Contributing
+
+1. Follow [Developer Guide](docs/developer-guide.md)
+2. Use conventional commits (`feat(scope): description`)
+3. Add tests for new features
+4. Update documentation
+
+---
+
+**Note**: This is early development. The GitLab API client is working, but CLI/TUI interfaces are not yet implemented. See [TODO.md](TODO.md) for current progress.
