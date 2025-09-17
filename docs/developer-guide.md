@@ -98,6 +98,30 @@ export GLUI_LOG_LEVEL="debug"
 
 **Note**: GLUI automatically loads `.env` file if present. Never commit `.env` with real tokens!
 
+## Validation
+
+```bash
+# Run all tests
+make test-all
+
+# Security audit
+make audit
+
+# Test coverage
+make test-coverage
+```
+
+## Release Process
+
+```bash
+# Development releases
+git tag v0.1.0
+git push --tags
+
+# Production releases (future)
+# Will use GitHub Actions for automated releases
+```
+
 ## Go Best Practices We Follow
 
 ### Code Organization

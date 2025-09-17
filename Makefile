@@ -30,7 +30,7 @@ update-golden:
 
 # Run tests with coverage
 test-coverage:
-	go test -coverprofile=coverage.out ./...
+	go test -coverprofile=coverage.out ./internal/...
 	go tool cover -html=coverage.out -o coverage.html
 
 # Lint code

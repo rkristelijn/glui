@@ -2,62 +2,70 @@
 
 GitLab Terminal UI - Navigate GitLab from your terminal with k9s-style interface.
 
-## 1. Context
-
-Terminal interface for GitLab operations - browse pipelines, merge requests, issues, and jobs with keyboard navigation. Designed for developers who prefer CLI/TUI tools over web interfaces.
+Browse pipelines, merge requests, issues, and jobs with keyboard navigation. Designed for developers who prefer CLI/TUI tools over web interfaces.
 
 **Status**: Early development - GitLab API client working, CLI/TUI interfaces in progress.
 
-## 2. Prerequisites
+## Installation
 
-- Go 1.21+ ([install guide](https://golang.org/doc/install))
-- GitLab personal access token ([create token](https://gitlab.com/-/profile/personal_access_tokens))
-
-## 3. Local Setup
+### Download Binary (Current)
 
 ```bash
-# Clone and build
+# Download latest release
+curl -L https://github.com/nlrxk0145/glui/releases/latest/download/glui-macos -o glui
+chmod +x glui
+sudo mv glui /usr/local/bin/
+```
+
+### Build from Source
+
+```bash
 git clone <repo-url>
 cd glui
 make build
+sudo mv glui /usr/local/bin/
+```
 
-# Configure GitLab access
+## Setup
+
+### 1. Create GitLab Token
+
+Create a personal access token at: https://gitlab.com/-/profile/personal_access_tokens
+
+Required scopes: `api`, `read_user`, `read_repository`
+
+### 2. Configure GLUI
+
+**Option A: Environment Variables**
+```bash
 export GITLAB_TOKEN="glpat-xxxxxxxxxxxxxxxxxxxx"
-export GITLAB_URL="https://gitlab.com"  # optional
-
-# Run (currently shows "not implemented yet")
-./glui              # Interactive TUI mode
-./glui pipelines    # CLI mode
+export GITLAB_URL="https://gitlab.com"  # optional, defaults to gitlab.com
 ```
 
-## 4. Validation
+**Option B: Configuration File**
+```bash
+# Create .env file in your project or home directory
+echo "GITLAB_TOKEN=glpat-xxxxxxxxxxxxxxxxxxxx" > .env
+echo "GITLAB_URL=https://gitlab.com" >> .env
+```
+
+## Usage
 
 ```bash
-# Run all tests
-make test-all
+# Interactive TUI mode
+glui
 
-# Security audit
-make audit
-
-# Test coverage
-make test-coverage
+# CLI mode (specific commands)
+glui pipelines
+glui merge-requests
+glui issues
 ```
 
-## 5. Release
+**Note**: Currently shows "not implemented yet" - TUI interface in development.
 
-```bash
-# Development releases
-git tag v0.1.0
-git push --tags
+## More Information
 
-# Production releases (future)
-# Will use GitHub Actions for automated releases
-```
-
-## 6. More Information
-
-- [📖 Developer Documentation](docs/README.md) - Architecture, contributing, technical details
-- [🚀 Developer Guide](docs/developer-guide.md) - Setup, conventions, best practices  
+- [📖 Developer Documentation](docs/README.md) - Contributing, architecture, technical details
 - [📋 Current Progress](TODO.md) - What's working, what's next
 - [🎯 Roadmap](docs/milestones.md) - Development phases and timeline
 
