@@ -1,113 +1,87 @@
-# GLUI Documentation
+# GLUI Developer Documentation
 
-GitLab Terminal UI - Navigate GitLab from your terminal with k9s-style interface.
+Technical documentation for contributors and maintainers.
 
-## Quick Start
+## 1. Context (Technical)
+
+| Document | Purpose |
+|----------|---------|
+| [Architecture](architecture.md) | C4 model, design decisions, tech stack |
+| [Code Principles](this-code-principles.md) | GLUI-specific principles (CLI UX, error handling) |
+| [General Principles](general-principles.md) | Universal coding principles (KISS, YAGNI, etc.) |
+| [Milestones](milestones.md) | Development roadmap and validation checkpoints |
+
+**Current Architecture**: Go application with GitLab API client, planned CLI/TUI interfaces using cobra/bubbletea.
+
+## 2. Prerequisites (Development)
+
+- **Go 1.21+** with modules support
+- **Security tools**: `make install-security` (govulncheck)
+- **Testing tools**: testify, expect (for E2E)
+- **GitLab token** for integration testing
+- **Development environment**: See [Developer Guide](developer-guide.md)
+
+## 3. Local Setup (Development)
 
 ```bash
-# Interactive mode
-glui
-
-# CLI mode  
-glui pipelines my-repo
-glui mrs --status=opened
-glui jobs 12345 --follow
+# Full development setup
+make deps              # Install dependencies
+make install-security  # Install security tools
+cp .env.example .env   # Configure environment
+make build            # Build binary
+make test-all         # Run all tests
 ```
 
-## Documentation
+**Development workflow**: TDD approach, conventional commits, pre-commit hooks enforced.
 
+## 4. Validation (Technical)
+
+| Test Type | Command | Coverage |
+|-----------|---------|----------|
+| Unit | `make test` | 81.8% (GitLab client) |
+| Integration | `make test-integration` | Real GitLab API |
+| E2E | `make test-e2e` | User workflows |
+| Security | `make audit` | Vulnerability scan |
+| Golden Files | `make update-golden` | TUI snapshots |
+
+**Quality gates**: All tests pass, no vulnerabilities, conventional commits.
+
+## 5. Release (Technical)
+
+```bash
+# Development process
+git commit -m "feat(scope): description"  # Conventional commits
+make test-all                            # Validate changes
+git tag v0.1.0                          # Version tagging
+git push --tags                         # Trigger release
+
+# Future: Automated releases via GitHub Actions
+```
+
+**Versioning**: Semantic versioning, automated changelog generation.
+
+## 6. More Information (Technical)
+
+### Core Documentation
 | Document | Purpose |
 |----------|---------|
 | [Developer Guide](developer-guide.md) | Security, conventions, Go best practices, setup |
 | [Code Template](code-template.md) | Template for new files with documentation links |
-| [Architecture](architecture.md) | C4 model, design decisions, tech stack |
-| [Milestones](milestones.md) | Development roadmap and validation checkpoints |
-| [General Principles](general-principles.md) | Universal coding principles (KISS, YAGNI, etc.) |
-| [Code Principles](this-code-principles.md) | GLUI-specific principles (CLI UX, error handling) |
+| [Documentation Orchestration](documentation-orchestration.md) | Rules for user vs developer docs |
+| [Documentation Orchestration](documentation-orchestration.md) | Rules for user vs developer docs |
 
-## Features
+### Project Management
+| Document | Purpose |
+|----------|---------|
+| [TODO](../TODO.md) | Current progress and next steps |
+| [Milestones](milestones.md) | Development phases and validation |
 
-### Core Features
-- **Pipelines** - List, monitor, create with custom variables
-- **Merge Requests** - Browse, create from templates  
-- **Jobs** - View logs with auto-refresh
-- **Issues** - List and navigate
-- **Navigation** - MR → Pipeline → Job → Logs workflow
+### Code Organization
+- **Package headers**: All files link to relevant documentation
+- **Testing**: Unit, integration, E2E, golden file testing
+- **Security**: Vulnerability scanning, secret management
+- **Architecture**: Clean separation of concerns (API, Core, UI)
 
-### User Experience
-- **Keyboard-first** - vim-like navigation (j/k, h/l)
-- **Fast** - Caching with smart refresh
-- **Offline-aware** - Works with cached data
-- **Multi-instance** - Support cloud + on-prem GitLab
+---
 
-## Architecture Overview
-
-```
-┌─────────────┐    ┌─────────────┐
-│   CLI Mode  │    │   TUI Mode  │
-└──────┬──────┘    └──────┬──────┘
-       │                  │
-       └────────┬─────────┘
-                │
-        ┌───────▼────────┐
-        │  Core Engine   │
-        └───────┬────────┘
-                │
-    ┌───────────┼───────────┐
-    │           │           │
-┌───▼───┐  ┌───▼────┐  ┌──▼───┐
-│ Cache │  │ GitLab │  │ Config│
-│       │  │  API   │  │       │
-└───────┘  └────────┘  └──────┘
-```
-
-## Development
-
-### Setup
-```bash
-git clone <repo>
-cd glui
-go mod tidy
-go run main.go
-```
-
-### Testing
-```bash
-go test ./...                    # Unit tests
-go test -tags=integration ./...  # Integration tests
-```
-
-### Building
-```bash
-go build -o glui main.go
-```
-
-## Configuration
-
-Default config location: `~/.config/glui/config.yaml`
-
-```yaml
-gitlab:
-  url: "https://gitlab.com"
-  token: "your-token"
-  
-cache:
-  ttl_pipelines: "30s"
-  ttl_mrs: "2m"
-  
-ui:
-  theme: "dark"
-  vim_keys: true
-```
-
-## Contributing
-
-1. Follow [General Principles](general-principles.md)
-2. Follow [Code Principles](this-code-principles.md)  
-3. Update docs for new features
-4. Add tests for new functionality
-
-## Inspiration
-
-- [k9s](https://github.com/derailed/k9s) - Kubernetes TUI
-- [glab-tui](https://github.com/gitlab-tui/glab-tui) - GitLab TUI reference
+**For end users**: See [root README.md](../README.md) for quick start and usage instructions.

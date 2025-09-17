@@ -2,119 +2,65 @@
 
 GitLab Terminal UI - Navigate GitLab from your terminal with k9s-style interface.
 
-## Status: M0 Foundation (40% Complete)
+## 1. Context
 
-✅ **Working**: GitLab API client, testing framework, security audit  
-🔄 **In Progress**: Core engine, CLI commands  
-📋 **Next**: TUI interface, navigation workflows
+Terminal interface for GitLab operations - browse pipelines, merge requests, issues, and jobs with keyboard navigation. Designed for developers who prefer CLI/TUI tools over web interfaces.
 
-## Quick Start
+**Status**: Early development - GitLab API client working, CLI/TUI interfaces in progress.
 
-### Prerequisites
+## 2. Prerequisites
+
 - Go 1.21+ ([install guide](https://golang.org/doc/install))
-- GitLab token for API access
+- GitLab personal access token ([create token](https://gitlab.com/-/profile/personal_access_tokens))
 
-### Installation
+## 3. Local Setup
+
 ```bash
+# Clone and build
 git clone <repo-url>
 cd glui
-make deps          # Install dependencies
-make build         # Build binary
-```
+make build
 
-### Usage
-```bash
-# Currently available (basic mode detection)
-./glui             # TUI mode (not implemented yet)
-./glui pipelines   # CLI mode (not implemented yet)
-
-# Development
-make test          # Run all tests
-make test-e2e      # Run E2E tests
-make audit         # Security audit
-```
-
-### Configuration
-```bash
-# Required for GitLab API access
+# Configure GitLab access
 export GITLAB_TOKEN="glpat-xxxxxxxxxxxxxxxxxxxx"
-export GITLAB_URL="https://gitlab.com"  # optional, defaults to gitlab.com
+export GITLAB_URL="https://gitlab.com"  # optional
+
+# Run (currently shows "not implemented yet")
+./glui              # Interactive TUI mode
+./glui pipelines    # CLI mode
 ```
 
-## Planned Features
+## 4. Validation
 
-### Core Features
-- **Pipelines** - List, monitor, create with custom variables
-- **Merge Requests** - Browse, create from templates  
-- **Jobs** - View logs with auto-refresh
-- **Issues** - List and navigate
-- **Navigation** - MR → Pipeline → Job → Logs workflow
-
-### User Experience
-- **Keyboard-first** - vim-like navigation (j/k, h/l)
-- **Fast** - Caching with smart refresh
-- **Offline-aware** - Works with cached data
-- **Multi-instance** - Support cloud + on-prem GitLab
-
-## Architecture
-
-```
-┌─────────────┐    ┌─────────────┐
-│   CLI Mode  │    │   TUI Mode  │
-└──────┬──────┘    └──────┬──────┘
-       │                  │
-       └────────┬─────────┘
-                │
-        ┌───────▼────────┐
-        │  Core Engine   │  ✅ GitLab API Client
-        └───────┬────────┘  🔄 Business Logic
-                │           📋 Caching Layer
-    ┌───────────┼───────────┐
-    │           │           │
-┌───▼───┐  ┌───▼────┐  ┌──▼───┐
-│ Cache │  │ GitLab │  │ Config│
-│       │  │  API   │  │       │
-└───────┘  └────────┘  └──────┘
-```
-
-## Development
-
-### Current Test Status
-- ✅ All tests pass
-- ✅ 81.8% code coverage
-- ✅ No security vulnerabilities
-- ✅ E2E testing framework ready
-
-### Commands
 ```bash
-make build         # Build binary
-make test          # Unit tests
-make test-e2e      # E2E tests
-make test-all      # All tests
-make audit         # Security audit
-make lint          # Code formatting
-make clean         # Clean artifacts
+# Run all tests
+make test-all
+
+# Security audit
+make audit
+
+# Test coverage
+make test-coverage
 ```
 
-## Documentation
+## 5. Release
 
-- [📖 Full Documentation](docs/README.md) - Architecture, principles, guides
-- [🚀 Developer Guide](docs/developer-guide.md) - Setup, conventions, best practices
-- [📋 TODO](TODO.md) - Current progress and next steps
-- [🎯 Milestones](docs/milestones.md) - Development roadmap
+```bash
+# Development releases
+git tag v0.1.0
+git push --tags
 
-## Inspiration
+# Production releases (future)
+# Will use GitHub Actions for automated releases
+```
 
-- [k9s](https://github.com/derailed/k9s) - Kubernetes TUI
-- [glab-tui](https://github.com/gitlab-tui/glab-tui) - GitLab TUI reference
+## 6. More Information
 
-## Contributing
-
-1. Follow [Developer Guide](docs/developer-guide.md)
-2. Use conventional commits (`feat(scope): description`)
-3. Add tests for new features
-4. Update documentation
+- [📖 Developer Documentation](docs/README.md) - Architecture, contributing, technical details
+- [🚀 Developer Guide](docs/developer-guide.md) - Setup, conventions, best practices  
+- [📋 Current Progress](TODO.md) - What's working, what's next
+- [🎯 Roadmap](docs/milestones.md) - Development phases and timeline
 
 ---
 
-**Note**: This is early development. The GitLab API client is working, but CLI/TUI interfaces are not yet implemented. See [TODO.md](TODO.md) for current progress.
+**Inspiration**: [k9s](https://github.com/derailed/k9s) (Kubernetes TUI) • [glab-tui](https://github.com/gitlab-tui/glab-tui) (GitLab TUI)
