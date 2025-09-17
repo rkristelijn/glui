@@ -105,6 +105,7 @@ export GLUI_LOG_LEVEL="debug"
 - **Small interfaces** - prefer many small interfaces over large ones
 - **Package naming** - short, lowercase, no underscores
 - **Error handling** - always handle errors, wrap with context
+- **Documentation links** - use [code template](code-template.md) for all new files
 
 ```go
 // Good - interface where it's used

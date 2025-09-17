@@ -1,3 +1,9 @@
+// Package gitlab provides GitLab API models and data structures
+//
+// Documentation:
+// - Architecture: docs/architecture.md (Data Flow sequence diagram)
+// - Developer Guide: docs/developer-guide.md (Go Best Practices - Code Organization)
+// - TODO: TODO.md (M0 Foundation - GitLab API Client)
 package gitlab
 
 import "time"

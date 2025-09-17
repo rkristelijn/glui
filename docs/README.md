@@ -19,6 +19,7 @@ glui jobs 12345 --follow
 | Document | Purpose |
 |----------|---------|
 | [Developer Guide](developer-guide.md) | Security, conventions, Go best practices, setup |
+| [Code Template](code-template.md) | Template for new files with documentation links |
 | [Architecture](architecture.md) | C4 model, design decisions, tech stack |
 | [Milestones](milestones.md) | Development roadmap and validation checkpoints |
 | [General Principles](general-principles.md) | Universal coding principles (KISS, YAGNI, etc.) |

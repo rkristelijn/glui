@@ -1,3 +1,9 @@
+// Package gitlab provides GitLab API client tests
+//
+// Documentation:
+// - Developer Guide: docs/developer-guide.md (Testing, TDD, Table-driven tests)
+// - Code Principles: docs/this-code-principles.md (Fail Fast, Fail Clear)
+// - TODO: TODO.md (M0 Foundation - GitLab API Client TDD)
 package gitlab
 
 import (

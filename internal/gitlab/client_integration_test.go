@@ -1,3 +1,9 @@
+// Package gitlab provides GitLab API integration tests
+//
+// Documentation:
+// - Developer Guide: docs/developer-guide.md (Testing - Integration Testing)
+// - Code Principles: docs/this-code-principles.md (Fail Fast, Fail Clear)
+// - TODO: TODO.md (M0 Foundation - Test with real GitLab instance)
 package gitlab
 
 import (

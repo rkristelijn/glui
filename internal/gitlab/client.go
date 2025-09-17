@@ -1,3 +1,10 @@
+// Package gitlab provides GitLab API client implementation
+//
+// Documentation:
+// - Architecture: docs/architecture.md (Component Diagram - GitLab Service)
+// - Developer Guide: docs/developer-guide.md (Go Best Practices, HTTP Clients)
+// - Code Principles: docs/this-code-principles.md (Fail Fast, Fail Clear)
+// - TODO: TODO.md (M0 Foundation - GitLab API Client)
 package gitlab
 
 import (

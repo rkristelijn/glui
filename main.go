@@ -1,3 +1,9 @@
+// Package main provides the entry point for GLUI - GitLab Terminal UI
+//
+// Documentation:
+// - Architecture: docs/architecture.md (Container Diagram - GLUI Application)
+// - Developer Guide: docs/developer-guide.md (Project Setup, Environment Setup)
+// - TODO: TODO.md (M0 Foundation progress)
 package main
 
 import (

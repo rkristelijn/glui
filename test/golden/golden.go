@@ -1,3 +1,9 @@
+// Package golden provides utilities for golden file testing (TUI snapshots)
+//
+// Documentation:
+// - Developer Guide: docs/developer-guide.md (TUI Testing Patterns - Golden File Testing)
+// - Code Principles: docs/this-code-principles.md (CLI-First Design, Context Awareness)
+// - TODO: TODO.md (M0 Foundation - Testing framework)
 package golden
 
 import (
