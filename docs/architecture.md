@@ -144,7 +144,162 @@ glui/
 └── test/          # Integration tests
 ```
 
-## Data Flow
+## Class Diagram (Current Implementation)
+
+```mermaid
+classDiagram
+    class Main {
+        +main()
+        -loadEnv()
+        -detectMode()
+    }
+    
+    class Client {
+        <<interface>>
+        +GetPipelines(repo string) []Pipeline, error
+    }
+    
+    class HTTPClient {
+        -baseURL string
+        -token string
+        -client *http.Client
+        +NewClient(baseURL, token string) Client
+        +GetPipelines(repo string) []Pipeline, error
+        -createRequest(url string) *http.Request, error
+        -handleResponse(resp *http.Response) []Pipeline, error
+    }
+    
+    class Pipeline {
+        +ID int
+        +Status string
+        +Ref string
+        +WebURL string
+        +CreatedAt time.Time
+    }
+    
+    Main --> Client : uses
+    Client <|-- HTTPClient : implements
+    HTTPClient --> Pipeline : returns
+    HTTPClient --> http.Client : uses
+```
+
+## Sequence Diagram (Current Flow)
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant M as Main
+    participant E as Environment
+    participant C as HTTPClient
+    participant G as GitLab API
+    
+    U->>M: ./glui [command]
+    M->>E: Load .env file
+    E-->>M: Environment variables
+    
+    alt CLI Mode
+        M->>M: Parse args[1]
+        M->>U: "CLI mode - not implemented yet"
+    else TUI Mode  
+        M->>U: "TUI mode - not implemented yet"
+    end
+    
+    Note over M,G: Future implementation
+    M->>C: NewClient(baseURL, token)
+    C->>C: Initialize HTTP client
+    M->>C: GetPipelines(repo)
+    C->>G: GET /api/v4/projects/{repo}/pipelines
+    G-->>C: JSON response
+    C->>C: Decode JSON to []Pipeline
+    C-->>M: []Pipeline, error
+    M-->>U: Display results
+```
+
+## Planned Architecture (Future Implementation)
+
+### Complete Class Diagram
+
+```mermaid
+classDiagram
+    class Main {
+        +main()
+        -loadEnv()
+        -detectMode()
+    }
+    
+    class CLI {
+        +Execute()
+        +AddCommand(cmd *Command)
+    }
+    
+    class TUI {
+        +Run() error
+        +Update(msg tea.Msg) tea.Model
+        +View() string
+    }
+    
+    class Core {
+        <<interface>>
+        +GetPipelines(repo string) []Pipeline, error
+        +GetMergeRequests(repo string) []MR, error
+        +CreatePipeline(repo, branch string) error
+    }
+    
+    class Engine {
+        -gitlab Client
+        -cache CacheService
+        -config ConfigService
+        +GetPipelines(repo string) []Pipeline, error
+        +GetMergeRequests(repo string) []MR, error
+    }
+    
+    class Client {
+        <<interface>>
+        +GetPipelines(repo string) []Pipeline, error
+        +GetMergeRequests(repo string) []MR, error
+    }
+    
+    class HTTPClient {
+        -baseURL string
+        -token string
+        -client *http.Client
+        +GetPipelines(repo string) []Pipeline, error
+        +GetMergeRequests(repo string) []MR, error
+    }
+    
+    class CacheService {
+        <<interface>>
+        +Get(key string) interface{}, error
+        +Set(key string, value interface{}, ttl time.Duration) error
+    }
+    
+    class FileCache {
+        -basePath string
+        +Get(key string) interface{}, error
+        +Set(key string, value interface{}, ttl time.Duration) error
+    }
+    
+    class Pipeline {
+        +ID int
+        +Status string
+        +Ref string
+        +WebURL string
+        +CreatedAt time.Time
+    }
+    
+    Main --> CLI : creates
+    Main --> TUI : creates
+    CLI --> Core : uses
+    TUI --> Core : uses
+    Core <|-- Engine : implements
+    Engine --> Client : uses
+    Engine --> CacheService : uses
+    Client <|-- HTTPClient : implements
+    CacheService <|-- FileCache : implements
+    HTTPClient --> Pipeline : returns
+```
+
+### Complete Data Flow
 
 ```mermaid
 sequenceDiagram

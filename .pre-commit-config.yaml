@@ -1,0 +1,14 @@
+repos:
+  - repo: local
+    hooks:
+      - id: docs-sync-check
+        name: Check docs are in sync
+        entry: ./scripts/check-docs-sync.sh
+        language: script
+        files: '\.(go|md)$'
+        
+      - id: readme-validation
+        name: Validate README structure
+        entry: ./scripts/validate-readme.sh
+        language: script
+        files: 'README\.md$'

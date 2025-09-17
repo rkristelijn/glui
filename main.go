@@ -22,7 +22,7 @@ func main() {
 		fmt.Println("CLI mode - not implemented yet")
 		fmt.Printf("Would run command: %s\n", os.Args[1])
 		if token := os.Getenv("GITLAB_TOKEN"); token != "" {
-			fmt.Printf("GitLab token loaded: %s...\n", token[:10])
+			fmt.Println("GitLab token loaded ✓")
 		} else {
 			fmt.Println("No GITLAB_TOKEN found")
 		}
@@ -31,7 +31,7 @@ func main() {
 		// Interactive TUI mode
 		fmt.Println("TUI mode - not implemented yet")
 		if token := os.Getenv("GITLAB_TOKEN"); token != "" {
-			fmt.Printf("GitLab token loaded: %s...\n", token[:10])
+			fmt.Println("GitLab token loaded ✓")
 		} else {
 			fmt.Println("No GITLAB_TOKEN found")
 		}

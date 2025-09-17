@@ -1,4 +1,9 @@
-.PHONY: build test test-integration test-e2e test-all lint clean audit install-security update-golden
+.PHONY: build test test-integration test-e2e test-all lint clean audit install-security update-golden docs-sync docs-validate deps
+
+# Install dependencies
+deps:
+	go mod tidy
+	go mod download
 
 # Build the binary
 build:
@@ -45,11 +50,15 @@ install-security:
 clean:
 	rm -f glui coverage.out coverage.html
 
-# Install dependencies
-deps:
-	go mod tidy
-	go mod download
-
 # Run the application
 run:
 	go run main.go
+
+# Check documentation sync
+docs-sync: build
+	./scripts/check-docs-sync.sh
+
+# Validate documentation
+docs-validate:
+	@command -v markdown-link-check >/dev/null 2>&1 || { echo "Installing markdown-link-check..."; npm install -g markdown-link-check; }
+	find . -name "*.md" -exec markdown-link-check {} \;
