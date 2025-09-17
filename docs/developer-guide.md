@@ -84,13 +84,19 @@ make lint          # Format and vet code
 
 ### Environment Setup
 ```bash
-# Required for testing with real GitLab
+# Option 1: Use .env file (recommended for development)
+cp .env.example .env
+# Edit .env with your GitLab token
+
+# Option 2: Export environment variables
 export GITLAB_TOKEN="glpat-xxxxxxxxxxxxxxxxxxxx"
 export GITLAB_URL="https://gitlab.com"  # or your instance
 
 # Optional
 export GLUI_LOG_LEVEL="debug"
 ```
+
+**Note**: GLUI automatically loads `.env` file if present. Never commit `.env` with real tokens!
 
 ## Go Best Practices We Follow
 
